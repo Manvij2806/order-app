@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# Logs
+*.log
+
+# Angular
+node_modules/
+.angular/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
