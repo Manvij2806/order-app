@@ -1,386 +1,277 @@
-# 🚀 Glassmorphic Order App: Full-Stack E-Commerce System
+<div align="center">
 
-An elegant, modern full-stack web application designed for browsing products, managing a shopping cart in real-time, and checking out orders. Built with an **Angular** frontend featuring glassmorphic UI principles and reactive streams, and a robust **FastAPI (Python)** backend leveraging relational databases and schema validation.
+# Order App
+
+### A full-stack e-commerce system — Angular 19 frontend · FastAPI backend · SQLite storage
+
+![Angular](https://img.shields.io/badge/Angular_19+-DD0031?style=flat-square&logo=angular&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/Python_3.9+-3776AB?style=flat-square&logo=python&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
+![RxJS](https://img.shields.io/badge/RxJS-B7178C?style=flat-square&logo=reactivex&logoColor=white)
+
+</div>
 
 ---
 
-## 🗺️ Architectural Overview & System Flow
+## Overview
 
-```mermaid
-graph TD
-    %% Frontend Components
-    subgraph Frontend [Angular Frontend - Port 4200]
-        UI[Glassmorphic UI Views]
-        RF[Reactive Forms]
-        CS[RxJS Cart Service]
-        OS[Order Service]
-        AI[Auth Interceptor]
-        EI[HTTP Error Interceptor]
-    end
+Order App is a production-structured, full-stack web application that covers the complete commerce lifecycle — register, browse a product catalog, manage a reactive cart, and check out. Every layer from Angular form validation down to SQLite row insertion is wired together, making it a clean vertical reference for how a real Angular + FastAPI system fits end-to-end.
 
-    %% Backend Components
-    subgraph Backend [FastAPI Backend - Port 8000]
-        API[FastAPI App & Routers]
-        PV[Pydantic Schema Validation]
-        AM[Auth Handler & Hashing]
-        DB_Dep[get_db Session Dependency]
-    end
+**What makes it interesting:**
+- **Zero-framework UI** — dark glassmorphic aesthetic using only vanilla CSS (`backdrop-filter`, radial gradients, CSS custom properties). No component library.
+- **Reactive-first cart** — RxJS `BehaviorSubject` propagates cart state across all components in real time without a reload.
+- **Dual validation** — Angular `FormGroup` guards the UI; Pydantic schemas guard the API. Neither trusts the other.
+- **Historical price integrity** — `OrderItem` snapshots `price_at_order` at checkout so order history never drifts if catalog prices change later.
+- **Auto-seeded database** — FastAPI's `lifespan` hook creates tables and seeds demo products on first run. Zero manual setup.
 
-    %% Storage Layer
-    subgraph Database [Storage Layer]
-        SQLite[(SQLite DB: order_app.db)]
-        ORM[SQLAlchemy ORM Models]
-    end
+---
 
-    %% User Interactions
-    User((User)) -->|Interacts| UI
-    UI -->|Triggers| RF
-    UI -->|Updates| CS
-    UI -->|Requests| OS
+## Screenshots
 
-    %% Client Services to Interceptors
-    OS -->|HTTP Requests| AI
-    AI -->|Injects Bearer Token| EI
-    EI -->|Forwards Clean Call| API
+<table>
+  <tr>
+    <td align="center"><b>Sign In</b></td>
+    <td align="center"><b>Register</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/login.png" width="420"/></td>
+    <td><img src="screenshots/register.png" width="420"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Shopping Cart</b></td>
+    <td align="center"><b>Checkout</b></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/cart.png" width="420"/></td>
+    <td><img src="screenshots/checkout.png" width="420"/></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><b>Order History</b></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="screenshots/orders.png" width="700"/></td>
+  </tr>
+</table>
 
-    %% Backend Processing
-    API -->|Validates Input| PV
-    API -->|Authenticates Token| AM
-    API -->|Requests session| DB_Dep
-    DB_Dep -->|Manages transaction| ORM
-    ORM -->|Reads / Writes| SQLite
+---
 
-    %% Error Flows
-    API -.->|Throws HTTP Exception| EI
-    EI -.->|Spawns Toast Notification| UI
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend framework | Angular 19+ (Standalone Components, functional interceptors) |
+| State management | RxJS `BehaviorSubject` |
+| Styling | Vanilla CSS — glassmorphic dark theme, no UI library |
+| HTTP | Angular `HttpClient` + functional interceptors |
+| Backend framework | FastAPI (Python) with auto-generated Swagger docs |
+| ORM | SQLAlchemy declarative mapping |
+| Database | SQLite (single-file, zero config) |
+| Validation | Pydantic schemas (backend) · Angular `FormGroup` (frontend) |
+| Security | SHA-256 password hashing · Bearer token auth |
+
+---
+
+## Project Structure
+
 ```
-
----
-
-## 🛠️ Technology Stack
-
-### 💻 Frontend (Angular)
-- **Framework:** Angular 19+ (Standalone Components, Functional Interceptors, Route-based views).
-- **State Management:** Reactive RxJS streams utilizing `BehaviorSubject` for client-side shopping cart memory.
-- **Styling:** Custom Vanilla CSS featuring CSS Custom Variables, background radial gradients, and modern frosted glass elements (`backdrop-filter`).
-- **HTTP Client:** Angular `HttpClient` configured with functional interceptors for authentication propagation and automated error handling.
-
-### 🐍 Backend (FastAPI)
-- **Framework:** FastAPI (Python) - High performance, automatic Swagger/OpenAPI docs generation, and context-based lifespan handling.
-- **Database ORM:** SQLAlchemy declarative mapping with relational structures and cascading deletions.
-- **Database Engine:** SQLite (Embedded single-file SQL database).
-- **Data Validation:** Pydantic schemas validating email syntax, phone regex pattern structures, string lengths, and numeric bounds.
-- **Security:** SHA-256 password hashing and token-based header verification.
-
----
-
-## 📁 Project Folder Structure
-
-Below is an annotated overview of the file organization, illustrating where components reside:
-
-```text
 order-app-workspace/
+│
 ├── backend/
-│   ├── main.py              # FastAPI main application config, lifespan setup, and CORS configuration
-│   ├── database.py          # SQLAlchemy SQLite connection setup, SessionLocal provider, and get_db dependency
-│   ├── models.py            # Relational database models (User, Product, Order, OrderItem, OrderStatus enum)
-│   ├── schemas.py           # Pydantic schemas for data serialization and API input validations
-│   ├── order_app.db         # SQLite database file (created automatically on startup)
+│   ├── main.py          # App factory, CORS, lifespan hook, DB seeding
+│   ├── database.py      # SQLAlchemy engine, SessionLocal, get_db dependency
+│   ├── models.py        # ORM tables: User, Product, Order, OrderItem
+│   ├── schemas.py       # Pydantic request/response models + validators
+│   ├── order_app.db     # SQLite file (auto-created on first run)
 │   └── routers/
-│       ├── auth.py          # Register, Login (mock token generator), and /me profile endpoints
-│       ├── products.py      # Product catalog fetching and initial seeding logic
-│       └── orders.py        # Order creation, order history retrieval, and status modification routers
+│       ├── auth.py      # Register · Login · /me
+│       ├── products.py  # Product catalog + seed logic
+│       └── orders.py    # Create · list · patch status
 │
 └── order-app/
-    ├── src/
-    │   ├── main.ts          # Angular application bootstrapper
-    │   ├── index.html       # Single HTML entry point containing the global layout structure
-    │   ├── styles.css       # Global styles, layout utilities, toast notifications, and dark themes
-    │   └── app/
-    │       ├── app.ts       # Root component supervising the application shell and Navbar display
-    │       ├── app.config.ts# Configures Zone.js detection, Routing, and HttpClient Interceptors
-    │       ├── app.routes.ts# Maps paths (/login, /products, /cart, /place-order, /orders) to components
-    │       ├── login/       # Login and Registration views, styling, and reactive validation forms
-    │       ├── products/    # Product list grid component displaying item stock status
-    │       ├── cart/        # Shopping cart view handling quantity operations and checkout links
-    │       ├── orders/      # Checkout forms and history components
-    │       │   ├── place-order/ # Order placement form (phone validation, automated user email matching)
-    │       │   └── order-list/  # Collapsible order history list mapping items and details
-    │       ├── services/    # Client side services:
-    │       │   ├── cart.ts   # RxJS-powered local cart storage and item modifiers
-    │       │   └── order.ts  # Angular HTTP client connection wrappers for order operations
-    │       ├── shared/      # Common assets:
-    │       │   └── navbar/   # Navigational headers visible inside the main platform
-    │       └── interceptors/# Functional interceptor modules:
-    │           ├── auth-interceptor.ts      # Automatic injection of Bearer token into HTTP headers
-    │           └── http-error-interceptor.ts# Error-catching service triggering pop-up Toast displays
-    └── package.json         # Frontend configuration, tasks, and dependency packages
+    └── src/app/
+        ├── app.ts                        # Root shell component
+        ├── app.config.ts                 # Providers: HttpClient, router, interceptors
+        ├── app.routes.ts                 # /login · /products · /cart · /place-order · /orders
+        ├── login/                        # Login & register views with reactive forms
+        ├── products/                     # Product grid with stock-aware add-to-cart
+        ├── cart/                         # Quantity controls, running total, checkout link
+        ├── orders/
+        │   ├── place-order/              # Checkout form (pre-filled from localStorage)
+        │   └── order-list/               # Collapsible order history cards
+        ├── services/
+        │   ├── cart.ts                   # BehaviorSubject cart store
+        │   └── order.ts                  # HTTP wrappers for order endpoints
+        ├── shared/navbar/                # Global navigation bar
+        └── interceptors/
+            ├── auth-interceptor.ts       # Injects Authorization: Bearer <token>
+            └── http-error-interceptor.ts # Global error → toast notification
 ```
 
 ---
 
-## 🔒 Authentication Flow (How it Works)
+## Architecture
 
-The system enforces authentication to protect operations such as creating orders or viewing history.
-
-```text
-[ Register User ] ──> Stores Hashed Password (SHA-256) inside DB
-                                │
-[ Login Request ] ──> Verifies Credentials ──> Returns custom "mock_token_username"
-                                │
-[ Local Storage ] <── Caches access_token, username, and email in browser
-                                │
-[ HTTP Request  ] ──> Angular Interceptor reads local cache ──> Adds Authorization Header
-                                │
-[ FastAPI Guard ] <── Parses token header ──> Resolves active User ORM entity
+```
+Browser (:4200)
+─────────────────────────────────────────────────────────
+  Angular Views  ←→  CartService (BehaviorSubject)
+        │
+  Auth Interceptor  →  Error Interceptor  →  HTTP Request
+        │
+─────────────────────────────────────────────────────────
+FastAPI (:8000)
+─────────────────────────────────────────────────────────
+  /auth   /api/products   /api/orders
+        │
+  Pydantic Validation  +  get_current_user()
+        │
+  SQLAlchemy ORM
+        │
+─────────────────────────────────────────────────────────
+  order_app.db  (SQLite)
 ```
 
-### 1. Registration
-- The user inputs a username, email, and password.
-- **Backend checks:** Ensures both username and email are unique across the database.
-- **Security:** The backend hashes the password using SHA-256 before writing it to the SQLite database.
-
-### 2. Login
-- The user provides their username and password.
-- The backend matches the SHA-256 hash of the submitted password against the hashed record in the database.
-- **Token Generation:** On success, the backend returns a mock OAuth2 Token format:
-  ```json
-  {
-    "access_token": "mock_token_developer123",
-    "token_type": "bearer",
-    "username": "developer123",
-    "email": "dev@example.com"
-  }
-  ```
-- **Caching:** The Angular application caches `auth_token`, `username`, and `email` inside browser `localStorage`.
-
-### 3. Session Middleware Injection
-- When Angular sends an API request, the **Auth Interceptor** extracts the token from `localStorage` and appends it to the headers:
-  ```http
-  Authorization: Bearer mock_token_developer123
-  ```
-- The backend dependency `get_current_user` decodes the token, extracts the username (`developer123`), queries the database for this user record, and injects the corresponding ORM `User` object directly into the router endpoint.
-
 ---
 
-## 📋 API Documentation & Specifications
+## Authentication Flow
 
-The FastAPI application mounts three main routers. You can view, test, and interact with all endpoints directly through the auto-generated **Swagger UI** page by navigating to `http://localhost:8000/docs` in your browser.
+```
+Register  →  SHA-256(password) stored in DB
 
-### 🔑 Authentication Routes (Prefix: `/auth`)
+Login     →  credentials verified
+          →  returns { access_token: "mock_token_<username>", username, email }
+          →  cached in localStorage
 
-| Method | Endpoint | Description | Auth Required | Payload Format | Key Returns |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/auth/register` | Register a new user | ❌ No | `RegisterRequest` (JSON) | `{"message": "User registered successfully"}` |
-| `POST` | `/auth/login` | Sign-in endpoint | ❌ No | JSON or UrlEncoded Form | `access_token`, `token_type`, `username`, `email` |
-| `GET` | `/auth/me` | Fetch active user credentials | `Yes` | Headers | `id`, `username`, `email` |
+Every request  →  authInterceptor reads token
+               →  appends: Authorization: Bearer mock_token_<username>
 
-### 📦 Product Routes (Prefix: `/api/products`)
-
-| Method | Endpoint | Description | Auth Required | Payload Format | Key Returns |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Get catalog of products | ❌ No | None | Array of `ProductResponse` objects |
-
-### 🛒 Order & Cart Routes (Prefix: `/api/orders`)
-
-| Method | Endpoint | Description | Auth Required | Payload Format | Key Returns |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/orders` | Checkout cart & save order | `Yes` | `OrderCreate` (JSON) | Created `OrderResponse` (Order items, values, ID) |
-| `GET` | `/api/orders` | Fetch orders for active user | `Yes` | None | Array of `OrderResponse` items |
-| `PATCH`| `/api/orders/{id}` | Modify status of an order | `Yes` | `OrderStatusUpdate` (JSON) | Modified `OrderResponse` |
-
----
-
-## 🔄 Dynamic End-to-End Workflow
-
-Here is how all pages, components, and backend entities coordinate to handle a typical user flow:
-
-### Step 1: Authentication View (`/login`)
-The user is presented with a card that toggles between **Login** and **Register**. 
-- **Validation:** On the frontend, Angular's `FormGroup` handles validation rules. For example, during registration, the email field must match email formatting, the username must be alphanumeric, and the password must be at least 8 characters. 
-- **API Call:** On submit, Angular posts to `/auth/login` or `/auth/register`. On success, tokens are saved to local storage, and the app redirects to `/products`.
-
-### Step 2: Catalog View (`/products`)
-- Angular sends a request to `/api/products` to fetch all products.
-- The UI lists all products inside a glassmorphic grid layout.
-- **Stock Check:** The component checks the `stock_qty` property of each item. If the quantity is 0, the UI disables the "Add to Cart" button and displays an "Out of Stock" badge.
-- Clicking "Add to Cart" passes the product model to the `CartService`.
-
-### Step 3: Shopping Cart (`/cart`)
-- `CartService` maintains an in-memory shopping list using an RxJS `BehaviorSubject`. This ensures that cart changes (such as total cost or item counts) update instantly across any listening component.
-- Inside `/cart`, users can increase or decrease quantities. Reducing a quantity to 0 removes the item from the cart.
-- Users can click "Proceed to Checkout" to move to `/place-order`.
-
-### Step 4: Checkout Process (`/place-order`)
-- The checkout form uses validation checks. It requires a `customer_name` (minimum 3 characters), `customer_email`, `delivery_address` (minimum 5 characters), and a 10-digit `phone` number.
-- The email and name fields are pre-populated with details retrieved from `localStorage`.
-- When the user clicks "Place Order", the frontend maps the items into an array of product IDs and quantities, sending it alongside the shipping details in a POST request to `/api/orders`.
-
-### Step 5: Database Transactions on Checkout
-Upon receiving the POST request:
-1. **Stock Verification:** The backend queries each item's stock level in the database. If there is insufficient stock, it rejects the request with an error.
-2. **Stock Update:** The backend decrements `stock_qty` for each ordered item in the database.
-3. **Database Insertion:** The backend saves a new `Order` record, and inserts the individual items as relational `OrderItem` records.
-4. **Clean up:** The backend commits the transaction to SQLite. The frontend then clears the client-side cart (`CartService.clearCart()`) and redirects the user to the orders page.
-
-### Step 6: Order History (`/orders`)
-- Angular calls the backend to retrieve all orders matching the authenticated user.
-- The frontend displays the orders in a list. Users can click on an order card to expand it, revealing its shipping address, telephone number, and itemized subtotal costs.
-
----
-
-## 🛡️ Input Validation Matrix
-
-Data consistency is enforced on both the client (Angular) and the server (FastAPI/Pydantic) to protect the application from invalid inputs:
-
-| Attribute | Frontend Validation (Angular) | Backend Validation (Pydantic) |
-| :--- | :--- | :--- |
-| **Username** | `Validators.required`<br>`Validators.minLength(3)` <br>Pattern: `^[a-zA-Z0-9_]+$` | String field: `min_length=3`, `max_length=30`<br>Pattern: `^[a-zA-Z0-9_]+$` |
-| **Email** | `Validators.required`<br>`Validators.email` | Strict `EmailStr` formatting validation |
-| **Password** | `Validators.required`<br>`Validators.minLength(8)` (Register)<br>`Validators.minLength(3)` (Login) | String field: `min_length=8`, `max_length=64` (Register) |
-| **Customer Name** | `Validators.required`<br>`Validators.minLength(3)` | String field: `min_length=3` |
-| **Address** | `Validators.required`<br>`Validators.minLength(5)` | String field: `min_length=5` |
-| **Phone** | `Validators.required`<br>Pattern: `^[0-9]{10}$` | String field: Matching regex pattern `^\d{10}$` |
-| **Order Items** | Evaluated on checkout button status | Required list: `min_length=1` item |
-| **Item Qty** | Managed via UI counter bounds | Integer field: `Field(gt=0)` (quantity must be > 0) |
-
----
-
-## 🗄️ Relational Database Schema (SQLite)
-
-The application uses SQLAlchemy to model four primary tables in SQLite.
-
-```mermaid
-erDiagram
-    USERS {
-        int id PK
-        string username UK
-        string email UK
-        string hashed_password
-    }
-    
-    PRODUCTS {
-        int id PK
-        string name
-        float price
-        int stock_qty
-    }
-    
-    ORDERS {
-        int id PK
-        int user_id FK
-        string customer_name
-        string customer_email
-        string delivery_address
-        string phone
-        string status
-        datetime created_at
-    }
-    
-    ORDER_ITEMS {
-        int id PK
-        int order_id FK
-        int product_id FK
-        int qty
-        float price_at_order
-    }
-
-    USERS ||--o{ ORDERS : "places"
-    ORDERS ||--|{ ORDER_ITEMS : "contains"
-    PRODUCTS ||--o{ ORDER_ITEMS : "references"
+FastAPI  →  get_current_user() parses token
+         →  queries DB, injects User ORM object into route handler
 ```
 
-### Table Relationships
-1. **User (1) ── (N) Order:** A user can place multiple orders. An order is linked to a user via the foreign key `user_id`.
-2. **Order (1) ── (N) OrderItem:** Each order consists of one or more line items. If an order is deleted, its associated line items are deleted automatically due to the database configuration:
-   `relationship("OrderItem", cascade="all, delete-orphan")`
-3. **OrderItem (N) ── (1) Product:** Each line item references a specific product in the database.
-4. **Historical Price Consistency:** `OrderItem` stores the `price_at_order`. This preserves the historical price of the product at the time of purchase, even if the price of the product changes in the catalog later.
+---
+
+## API Reference
+
+> Full interactive docs at **`http://localhost:8000/docs`**
+
+### Auth — `/auth`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/auth/register` | ✗ | Create account — validates uniqueness, stores hashed password |
+| `POST` | `/auth/login` | ✗ | Returns bearer token + user info |
+| `GET` | `/auth/me` | ✓ | Current user `id`, `username`, `email` |
+
+### Products — `/api/products`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/products` | ✗ | Full catalog with name, price, stock quantity |
+
+### Orders — `/api/orders`
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/api/orders` | ✓ | Validate stock → decrement inventory → persist order |
+| `GET` | `/api/orders` | ✓ | All orders for the authenticated user |
+| `PATCH` | `/api/orders/{id}` | ✓ | Update order status |
 
 ---
 
-## ⚙️ Development Environment Setup
+## Database Schema
 
-### 1. Backend Setup (FastAPI & SQLite)
+```
+USERS                    PRODUCTS
+──────────────────       ──────────────────
+id          PK           id          PK
+username    UNIQUE        name
+email       UNIQUE        price
+hashed_pwd               stock_qty
+    │
+    │ 1:N
+    ▼
+ORDERS                   ORDER_ITEMS
+──────────────────       ──────────────────
+id          PK           id              PK
+user_id     FK ───┐      order_id        FK ──→ ORDERS
+customer_name     │      product_id      FK ──→ PRODUCTS
+customer_email    │      qty
+delivery_address  └───── price_at_order       ← value snapshot
+phone
+status
+created_at
+```
 
-#### Prerequisites
-- Make sure Python 3.9 or higher is installed.
-
-#### Setup Steps
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-3. Activate the virtual environment:
-   - **Windows PowerShell:**
-     ```powershell
-     .\venv\Scripts\Activate.ps1
-     ```
-   - **macOS / Linux:**
-     ```bash
-     source venv/bin/activate
-     ```
-4. Install dependencies:
-   ```bash
-   pip install fastapi uvicorn sqlalchemy pydantic email-validator
-   ```
-5. Run the FastAPI development server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-6. **Verify Server Running:** Open `http://127.0.0.1:8000/docs` in your browser. The application should load the interactive **Swagger UI** page.
-   > **Note:** On server startup, the database is initialized and seeded with default products (e.g. Wireless Mouse, Mechanical Keyboard) if the tables are empty.
+`price_at_order` is a **snapshot** — historical totals never change when catalog prices update.  
+`Order → OrderItem` uses `cascade="all, delete-orphan"` — deleting an order cleans up its line items automatically.
 
 ---
 
-### 2. Frontend Setup (Angular)
+## Validation
 
-#### Prerequisites
-- Make sure Node.js (version 18 or higher) and npm are installed.
+Both layers validate independently. Frontend for UX speed; backend as the security boundary.
 
-#### Setup Steps
-1. Navigate to the frontend directory:
-   ```bash
-   cd order-app
-   ```
-2. Install the project dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Angular development server:
-   ```bash
-   npm run dev
-   # OR
-   npx ng serve
-   ```
-4. **Verify Application:** Open `http://localhost:4200/` in your browser.
+| Field | Angular | Pydantic |
+|-------|---------|---------|
+| Username | required · minLength(3) · `^[a-zA-Z0-9_]+$` | min=3 · max=30 · same pattern |
+| Email | required · `Validators.email` | `EmailStr` |
+| Password | required · minLength(8) on register | min=8 · max=64 |
+| Phone | required · `^[0-9]{10}$` | `^\d{10}$` |
+| Address | required · minLength(5) | min=5 |
+| Item Qty | UI counter ≥ 1 | `Field(gt=0)` |
 
 ---
 
-## 🎓 Interview-Ready Q&A Reference
+## Local Setup
 
-### Q1: What is a `BehaviorSubject` in RxJS, and why is it used in the `CartService`?
-> **Answer:** A `BehaviorSubject` is a special type of RxJS Subject that stores the current state and emits it to new subscribers immediately. In the shopping cart service, it acts as a client-side state store. When components like the cart page or checkout page subscribe to `items$`, they instantly receive the latest list of cart items. Any changes made to the cart automatically update all subscribing components.
+### Backend
 
-### Q2: What is the purpose of functional interceptors in Angular?
-> **Answer:** Interceptors process outgoing HTTP requests and incoming HTTP responses globally.
-> - **`authInterceptor`:** Inspects `localStorage` for a saved token and appends it to request headers automatically. This keeps components clean, as they don't have to manage authentication headers for every request.
-> - **`httpErrorInterceptor`:** Catches failed network requests (like invalid validation or unauthorized access) and displays an error message on screen using toast notifications.
+```bash
+cd backend
+python -m venv venv
 
-### Q3: Why does `OrderItem` store `price_at_order` rather than referencing `Product.price`?
-> **Answer:** If we only refer to the product table to fetch prices, changing a product's price in the catalog will retroactively alter the total cost of all previously placed orders. Storing a snapshot of the price at checkout ensures that order histories remain accurate and unaffected by future catalog price changes.
+# Windows
+.\venv\Scripts\Activate.ps1
+# macOS / Linux
+source venv/bin/activate
 
-### Q4: How is Database Seeding managed on Startup in FastAPI?
-> **Answer:** FastAPI uses a `lifespan` context manager. This hook runs before the server starts accepting HTTP requests. Inside `lifespan`, the backend generates the database tables and checks if the product table is empty. If it is, the server seeds the table with default products.
+pip install fastapi uvicorn sqlalchemy pydantic email-validator
+uvicorn main:app --reload
+```
 
-### Q5: How do Pydantic (Backend) and Angular (Frontend) validations work together?
-> **Answer:**
-> - **Frontend validation** provides immediate feedback to the user, improving usability by preventing the submission of incomplete forms.
-> - **Backend validation** acts as the system's primary security barrier. Since clients can bypass frontend checks by calling APIs directly (e.g. via Postman or curl), backend validation ensures that only valid data is written to the database.
+→ API: `http://127.0.0.1:8000`  
+→ Swagger UI: `http://127.0.0.1:8000/docs`
 
-### Q6: What is SQLite, and is it suitable for production environments?
-> **Answer:** SQLite is a serverless, single-file relational database engine that does not run as a separate process. While ideal for development, testing, and low-traffic applications, high-concurrency production systems generally use database engines like PostgreSQL or MySQL to better handle concurrent write transactions.
+> First run creates and seeds the database automatically.
+
+### Frontend
+
+```bash
+cd order-app
+npm install
+npx ng serve
+```
+
+→ App: `http://localhost:4200`
+
+---
+
+## Known Limitations
+
+This project is architecture-correct but intentionally simplified in a few areas:
+
+| Area | Current | Production equivalent |
+|------|---------|----------------------|
+| Token format | `mock_token_<username>` | Signed JWT |
+| Password hashing | SHA-256 | bcrypt / argon2 |
+| Database | SQLite | PostgreSQL / MySQL |
+| Token storage | `localStorage` | `httpOnly` cookie |
+
+---
+
+<div align="center">
+Angular · FastAPI · SQLAlchemy · RxJS · SQLite · TypeScript · Python
+</div>
